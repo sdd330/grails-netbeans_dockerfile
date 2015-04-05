@@ -34,7 +34,7 @@ ENV PATH $GRAILS_HOME/bin:$PATH
 
 # Install NetBeans
 ADD state.xml /tmp/state.xml
-RUN wget http://download.netbeans.org/netbeans/8.0.2/final/bundles/netbeans-8.0.2-javase-linux.sh -O /tmp/netbeans.sh -q && \
+RUN wget http://download.netbeans.org/netbeans/8.0.2/final/bundles/netbeans-8.0.2-linux.sh -O /tmp/netbeans.sh -q && \
     chmod +x /tmp/netbeans.sh && \
     echo 'Installing NetBeans' && \
     /tmp/netbeans.sh --silent --state /tmp/state.xml && \
