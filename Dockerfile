@@ -1,12 +1,23 @@
-FROM java:8
+FROM phusion/baseimage:0.9.16
 MAINTAINER Yang Leijun <yang.leijun@gmail.com>
 
 # Set customizable env vars defaults.
 ENV GRAILS_VERSION 2.4.4
 
-# Download Install Tools
+# Download Install Dependencies
+RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main" | tee -a /etc/apt/sources.list
+RUN echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu precise main" | tee -a /etc/apt/sources.list
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886
 RUN apt-get update
-RUN apt-get install -y unzip
+RUN apt-get -y upgrade
+
+# Auto accept oracle jdk license
+RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+RUN apt-get install -y oracle-java8-installer ca-certificates libxext-dev libxrender-dev libxtst-dev unzip
+RUN update-alternatives --display java
+
+# Add JAVA_HOME to path.
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
 # Install Grails
 WORKDIR /
@@ -27,15 +38,26 @@ RUN wget http://download.netbeans.org/netbeans/8.0.2/final/bundles/netbeans-8.0.
     /tmp/netbeans.sh --silent --state /tmp/state.xml && \
     rm -rf /tmp/*
 
-# Define mount point to access data on host system.
-VOLUME ["/workspace"]
-
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add start script
 ADD run.sh /usr/local/bin/netbeans
-RUN chmod +x /usr/local/bin/netbeans
+
+RUN chmod +x /usr/local/bin/netbeans && \
+    mkdir -p /home/developer && \
+    echo "developer:x:1000:1000:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
+    echo "developer:x:1000:" >> /etc/group && \
+    echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
+    chmod 0440 /etc/sudoers.d/developer && \
+    chown developer:developer -R /home/developer
+
+USER developer
+ENV HOME /home/developer
+WORKDIR /home/developer
+
+# Define mount point to access data on host system.
+VOLUME ["/home/developer/workspace"]
 
 # Execute start script to launch it.
 CMD /usr/local/bin/netbeans
