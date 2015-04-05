@@ -43,33 +43,10 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add start script
 ADD run.sh /usr/local/bin/netbeans
-
-RUN echo 1000 > /etc/container_environment/uid
-RUN echo 1000 > /etc/container_environment/gid
-RUN echo 1000 > /etc/container_environment/HOME
-RUN echo developer > /etc/container_environment/USER
-RUN echo /home/developer > /etc/container_environment/HOME
-RUN the_user="developer" && \
-    the_home="/home/$the_user" && \
-    the_capital_user=$(echo $the_user | sed 's/./\U&/') && \
-    echo $the_home > /etc/container_environment/HOME && \
-    echo $the_user > /etc/container_environment/USER && \
-    echo ":0" > /etc/container_environment/DISPLAY && \
-    echo "/tmp/.Xauthority" > /etc/container_environment/XAUTHORITY && \
-    echo "$the_user:x:1000:1000:$the_capital_user,,,:/$the_user:/bin/bash" >> /etc/passwd && \
-    echo "$the_user:x:1000:" >> /etc/group && \
-    echo "$the_user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$the_user && \
-    chmod 0440 /etc/sudoers.d/$the_user && \
-    mkdir -p $the_home && \
-    chown $the_user:$the_user -R $the_home && \
-    chmod +x /usr/local/bin/netbeans
-	
-USER developer
-ENV HOME /home/developer
-WORKDIR /home/developer
+RUN chmod +x /usr/local/bin/netbeans
 
 # Define mount point to access data on host system.
-VOLUME ["/home/developer/workspace"]
+VOLUME ["/workspace"]
 
 # Execute start script to launch it.
 ENTRYPOINT ["/sbin/my_init"]
