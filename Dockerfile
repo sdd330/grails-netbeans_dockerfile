@@ -38,4 +38,4 @@ ADD run.sh /usr/local/bin/netbeans
 RUN chmod +x /usr/local/bin/netbeans
 
 # Execute start script to launch it.
-ENTRYPOINT ["run.sh"]
+CMD /usr/local/bin/netbeans
